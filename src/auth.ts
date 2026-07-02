@@ -6,7 +6,7 @@ import { authConfig } from "./auth.config";
 import { prisma } from "./lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  ...authConfig,
+  ...authConfig, // includes trustHost: true for the proxy
   session: { strategy: "jwt" },
   providers: [
     Credentials({

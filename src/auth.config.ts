@@ -3,6 +3,10 @@ import type { NextAuthConfig } from "next-auth";
 // Edge-safe auth config: NO Prisma or bcrypt here so it can run in the
 // middleware (Edge runtime). The Credentials provider itself lives in auth.ts.
 export const authConfig = {
+  // Trust the reverse-proxy host in production (fixes "UntrustedHost").
+  // Set here in the shared config so BOTH the middleware's NextAuth instance
+  // and the main auth.ts instance trust the forwarded host.
+  trustHost: true,
   pages: {
     signIn: "/",
   },
