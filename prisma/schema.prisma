@@ -1,0 +1,133 @@
+// Smile Link — Social Media Management System
+// Prisma schema. Models mirror the "Data Models" section of REQUIREMENTS.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  MARKETING_MANAGER
+  SOCIAL_MEDIA_MANAGER
+  GRAPHIC_DESIGNER
+  VIDEOGRAPHER
+}
+
+enum ContentType {
+  REEL
+  CAROUSEL
+  SINGLE_POST
+  STORY
+}
+
+// Decides whether a piece can be assigned to a designer (DESIGN) or a videographer (VIDEO).
+enum Format {
+  DESIGN
+  VIDEO
+}
+
+// ContentPiece.status state machine (see "Content Workflow" in REQUIREMENTS.md).
+enum ContentStatus {
+  PLANNED
+  ASSIGNED
+  IN_PROGRESS
+  SUBMITTED
+  APPROVED
+  NEEDS_REVISION
+}
+
+enum ReviewDecision {
+  APPROVED
+  REJECTED
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  monthlyDirections MonthlyDirection[] @relation("DirectionAuthor")
+  createdPieces     ContentPiece[]     @relation("PieceCreator")
+  assignedPieces    ContentPiece[]     @relation("PieceAssignee")
+  reviews           ReviewLog[]        @relation("Reviewer")
+
+  @@index([role])
+}
+
+// The theme and guidance the marketing manager sets each month.
+model MonthlyDirection {
+  id          String   @id @default(cuid())
+  month       String   @unique // e.g. "2026-07", one record per month
+  theme       String
+  direction   String   @db.Text
+  createdById String
+  createdBy   User     @relation("DirectionAuthor", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pieces ContentPiece[]
+
+  @@index([createdById])
+}
+
+// The core card in the plan.
+model ContentPiece {
+  id                 String           @id @default(cuid())
+  title              String
+  contentType        ContentType
+  format             Format
+  caption            String           @db.Text
+  brief              String           @db.Text
+  scheduledDate      DateTime         @db.Date
+  status             ContentStatus    @default(PLANNED)
+  monthlyDirectionId String
+  monthlyDirection   MonthlyDirection @relation(fields: [monthlyDirectionId], references: [id])
+  assignedToId       String?
+  assignedTo         User?            @relation("PieceAssignee", fields: [assignedToId], references: [id])
+  referenceLink      String? // reference/inspiration URL the SM manager attaches for the creator
+  creativeLink       String? // the finished asset link submitted by the creator
+  createdById        String
+  createdBy          User             @relation("PieceCreator", fields: [createdById], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  reviews ReviewLog[]
+
+  @@index([monthlyDirectionId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([scheduledDate])
+}
+
+// History of each approve/reject action so comments survive across revisions.
+model ReviewLog {
+  id             String         @id @default(cuid())
+  contentPieceId String
+  contentPiece   ContentPiece   @relation(fields: [contentPieceId], references: [id], onDelete: Cascade)
+  reviewerId     String
+  reviewer       User           @relation("Reviewer", fields: [reviewerId], references: [id])
+  decision       ReviewDecision
+  comment        String         @db.Text
+  createdAt      DateTime       @default(now())
+
+  @@index([contentPieceId])
+  @@index([reviewerId])
+}
