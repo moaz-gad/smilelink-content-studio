@@ -125,10 +125,17 @@ export default function Sidebar({ user }: { user: Session["user"] }) {
             </p>
           </div>
         </div>
+        <Link
+          href="/change-password"
+          className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <IconKey />
+          Change password
+        </Link>
         <form action={signOutAction}>
           <button
             type="submit"
-            className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
           >
             <IconLogout />
             Sign out
@@ -220,6 +227,14 @@ function IconClipboard() {
       <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
       <rect x="8" y="2" width="8" height="4" rx="1" />
       <path d="M9 12l2 2 4-4" />
+    </IconBase>
+  );
+}
+function IconKey() {
+  return (
+    <IconBase>
+      <circle cx="7.5" cy="15.5" r="4.5" />
+      <path d="m10.7 12.3 8.3-8.3M16 5l3 3M14 7l3 3" />
     </IconBase>
   );
 }

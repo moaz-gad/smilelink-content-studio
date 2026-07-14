@@ -49,6 +49,10 @@ export default async function CalendarPage({
       creativeLink: true,
       scheduledDate: true,
       assignedTo: { select: { name: true } },
+      channels: {
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, icon: true },
+      },
     },
   });
 
@@ -62,6 +66,7 @@ export default async function CalendarPage({
     assigneeName: p.assignedTo?.name ?? null,
     creativeLink: p.creativeLink,
     dateISO: p.scheduledDate.toISOString().slice(0, 10),
+    channels: p.channels,
   }));
 
   const todayISO = new Date().toISOString().slice(0, 10);

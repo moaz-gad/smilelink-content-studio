@@ -30,6 +30,12 @@ export default async function ContentPage() {
     select: { id: true, name: true, role: true },
   });
 
+  // Available social channels for the create form's multi-select.
+  const channels = await prisma.channel.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, icon: true },
+  });
+
   const pieces = direction
     ? await prisma.contentPiece.findMany({
         where: { monthlyDirectionId: direction.id },
@@ -43,6 +49,10 @@ export default async function ContentPage() {
           scheduledDate: true,
           referenceLink: true,
           assignedTo: { select: { id: true, name: true } },
+          channels: {
+            orderBy: { name: "asc" },
+            select: { id: true, name: true, icon: true },
+          },
         },
       })
     : [];
@@ -83,7 +93,7 @@ export default async function ContentPage() {
             </div>
           )}
 
-          <NewContentForm />
+          <NewContentForm channels={channels} />
           <ContentTable pieces={pieces} creators={creators} />
         </>
       ) : (

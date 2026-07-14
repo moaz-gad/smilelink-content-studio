@@ -6,7 +6,7 @@ import {
   updateContentPiece,
   type ContentFormState,
 } from "@/app/actions/content";
-import ContentFields from "./ContentFields";
+import ContentFields, { type ChannelOption } from "./ContentFields";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -23,7 +23,9 @@ function SubmitButton() {
 
 export default function EditContentForm({
   piece,
+  channels,
 }: {
+  channels: ChannelOption[];
   piece: {
     id: string;
     title: string;
@@ -33,6 +35,7 @@ export default function EditContentForm({
     brief: string;
     referenceLink: string;
     scheduledDate: string;
+    channelIds: string[];
   };
 }) {
   const [state, formAction] = useFormState<ContentFormState, FormData>(
@@ -46,7 +49,7 @@ export default function EditContentForm({
       className="rounded-2xl border border-line bg-surface p-6 shadow-card"
     >
       <input type="hidden" name="id" value={piece.id} />
-      <ContentFields defaults={piece} />
+      <ContentFields defaults={piece} channels={channels} />
 
       {state?.error && (
         <p

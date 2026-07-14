@@ -27,6 +27,26 @@ async function main() {
   });
 
   console.log(`Seeded marketing manager: ${admin.email} (id: ${admin.id})`);
+
+  // Common social media channels. `icon` is a Simple Icons slug rendered via
+  // react-icons/si in the UI (e.g. "instagram" -> SiInstagram).
+  const channels = [
+    { name: "Instagram", icon: "instagram" },
+    { name: "TikTok", icon: "tiktok" },
+    { name: "LinkedIn", icon: "linkedin" },
+    { name: "Facebook", icon: "facebook" },
+    { name: "YouTube", icon: "youtube" },
+  ];
+
+  for (const channel of channels) {
+    await prisma.channel.upsert({
+      where: { name: channel.name },
+      update: { icon: channel.icon },
+      create: channel,
+    });
+  }
+
+  console.log(`Seeded ${channels.length} channels`);
 }
 
 main()

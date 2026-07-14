@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ContentType, Format, ContentStatus } from "@prisma/client";
 import StatusBadge from "@/components/StatusBadge";
+import ChannelIcon from "@/components/channels/ChannelIcon";
 import DeleteButton from "./DeleteButton";
 import { assignContentPiece } from "@/app/actions/content";
 import {
@@ -24,6 +25,7 @@ type Piece = {
   scheduledDate: Date;
   referenceLink: string | null;
   assignedTo: { id: string; name: string } | null;
+  channels: { id: string; name: string; icon: string }[];
 };
 
 // Assignment is offered while a piece is still being planned/assigned.
@@ -76,6 +78,18 @@ export default function ContentTable({
                     >
                       ref
                     </a>
+                  )}
+                  {p.channels.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      {p.channels.map((c) => (
+                        <ChannelIcon
+                          key={c.id}
+                          icon={c.icon}
+                          name={c.name}
+                          size={14}
+                        />
+                      ))}
+                    </div>
                   )}
                 </td>
                 <td className="px-5 py-4 text-ink-muted">

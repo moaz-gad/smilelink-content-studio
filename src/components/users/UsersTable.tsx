@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Role } from "@prisma/client";
 import { ROLE_LABELS } from "@/lib/roles";
 import { setUserActive } from "@/app/actions/users";
+import ResetPasswordButton from "@/components/users/ResetPasswordButton";
 
 type Row = {
   id: string;
@@ -66,6 +67,7 @@ export default function UsersTable({
                     >
                       Edit
                     </Link>
+                    <ResetPasswordButton userId={u.id} userName={u.name} />
                     <form action={setUserActive}>
                       <input type="hidden" name="id" value={u.id} />
                       <input

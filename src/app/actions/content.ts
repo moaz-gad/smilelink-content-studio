@@ -35,6 +35,7 @@ type ParsedFields = {
   brief: string;
   referenceLink: string | null;
   scheduledDate: Date;
+  channelIds: string[];
 };
 
 function parseFields(formData: FormData): ParsedFields | string {
@@ -58,6 +59,12 @@ function parseFields(formData: FormData): ParsedFields | string {
   const ref = normalizeUrl(referenceLinkRaw);
   if (!ref.ok) return "Reference link must be a valid http(s) URL.";
 
+  // Multi-select: many checkboxes share the name "channels".
+  const channelIds = formData
+    .getAll("channels")
+    .map((c) => String(c))
+    .filter(Boolean);
+
   return {
     title,
     contentType: contentType as ContentType,
@@ -66,7 +73,19 @@ function parseFields(formData: FormData): ParsedFields | string {
     brief,
     referenceLink: ref.value,
     scheduledDate,
+    channelIds,
   };
+}
+
+// Filters submitted channel ids down to those that actually exist, so a stale
+// or tampered form can never make Prisma throw on a missing relation.
+async function validChannelConnect(channelIds: string[]) {
+  if (channelIds.length === 0) return [];
+  const found = await prisma.channel.findMany({
+    where: { id: { in: channelIds } },
+    select: { id: true },
+  });
+  return found.map((c) => ({ id: c.id }));
 }
 
 export async function createContentPiece(
@@ -89,16 +108,19 @@ export async function createContentPiece(
     };
   }
 
+  const { channelIds, ...fields } = parsed;
   await prisma.contentPiece.create({
     data: {
-      ...parsed,
+      ...fields,
       status: "PLANNED",
       monthlyDirectionId: direction.id,
       createdById: user.id,
+      channels: { connect: await validChannelConnect(channelIds) },
     },
   });
 
   revalidatePath("/content");
+  revalidatePath("/calendar");
   return { success: `"${parsed.title}" planned.` };
 }
 
@@ -127,15 +149,20 @@ export async function updateContentPiece(
     parsed.format !== existing.format &&
     existing.assignedTo?.role !== FORMAT_TO_ROLE[parsed.format as FormatName];
 
+  const { channelIds, ...fields } = parsed;
   await prisma.contentPiece.update({
     where: { id },
     data: {
-      ...parsed,
+      ...fields,
+      // `set` replaces the full channel list to match the checkboxes — an
+      // empty array clears them all.
+      channels: { set: await validChannelConnect(channelIds) },
       ...(clearsAssignment ? { assignedToId: null, status: "PLANNED" } : {}),
     },
   });
 
   revalidatePath("/content");
+  revalidatePath("/calendar");
   return {
     success: clearsAssignment
       ? "Piece updated. The format changed, so the previous assignment was cleared."

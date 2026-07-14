@@ -6,7 +6,7 @@ import {
   createContentPiece,
   type ContentFormState,
 } from "@/app/actions/content";
-import ContentFields from "./ContentFields";
+import ContentFields, { type ChannelOption } from "./ContentFields";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -21,7 +21,11 @@ function SubmitButton() {
   );
 }
 
-export default function NewContentForm() {
+export default function NewContentForm({
+  channels,
+}: {
+  channels: ChannelOption[];
+}) {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState<ContentFormState, FormData>(
     createContentPiece,
@@ -56,7 +60,7 @@ export default function NewContentForm() {
           action={formAction}
           className="border-t border-line px-6 py-5"
         >
-          <ContentFields />
+          <ContentFields channels={channels} />
 
           {state?.error && (
             <p

@@ -6,15 +6,20 @@ import {
   FORMATS,
   FORMAT_LABELS,
 } from "@/lib/content";
+import ChannelIcon from "@/components/channels/ChannelIcon";
 
 export const field =
   "w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20";
 export const label = "mb-1.5 block text-sm font-medium text-ink";
 
+export type ChannelOption = { id: string; name: string; icon: string };
+
 // Shared field set used by both the create and edit forms.
 export default function ContentFields({
   defaults,
+  channels = [],
 }: {
+  channels?: ChannelOption[];
   defaults?: {
     title?: string;
     contentType?: string;
@@ -23,9 +28,11 @@ export default function ContentFields({
     brief?: string;
     referenceLink?: string;
     scheduledDate?: string;
+    channelIds?: string[];
   };
 }) {
   const d = defaults ?? {};
+  const selectedChannels = new Set(d.channelIds ?? []);
   return (
     <div className="space-y-4">
       <div>
@@ -142,6 +149,42 @@ export default function ContentFields({
           placeholder="https://…  inspiration / reference for the creator"
           className={field}
         />
+      </div>
+
+      <div>
+        <span className={label}>
+          Channels{" "}
+          <span className="font-normal text-ink-muted">
+            (select all that apply)
+          </span>
+        </span>
+        {channels.length === 0 ? (
+          <p className="text-sm text-ink-muted">
+            No channels available. Ask an admin to seed them.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {channels.map((c) => (
+              <label
+                key={c.id}
+                className="relative cursor-pointer select-none"
+                title={c.name}
+              >
+                <input
+                  type="checkbox"
+                  name="channels"
+                  value={c.id}
+                  defaultChecked={selectedChannels.has(c.id)}
+                  className="peer sr-only"
+                />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-canvas peer-checked:border-brand-primary peer-checked:bg-brand-primary/10 peer-checked:text-brand-primary-dark peer-focus-visible:ring-2 peer-focus-visible:ring-brand-primary/20">
+                  <ChannelIcon icon={c.icon} name={c.name} size={16} />
+                  {c.name}
+                </span>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

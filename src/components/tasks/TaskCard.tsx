@@ -3,6 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { markInProgress, submitWork, type TaskFormState } from "@/app/actions/tasks";
 import StatusBadge from "@/components/StatusBadge";
+import ChannelIcon from "@/components/channels/ChannelIcon";
 import {
   CONTENT_TYPE_LABELS,
   type ContentStatusName,
@@ -19,6 +20,7 @@ export type TaskPiece = {
   referenceLink: string | null;
   creativeLink: string | null;
   status: ContentStatusName;
+  channels: { id: string; name: string; icon: string }[];
   rejectionComment: string | null;
 };
 
@@ -92,6 +94,18 @@ export default function TaskCard({ piece }: { piece: TaskPiece }) {
             {CONTENT_TYPE_LABELS[piece.contentType]} · scheduled{" "}
             {piece.scheduledLabel}
           </p>
+          {piece.channels.length > 0 && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              {piece.channels.map((c) => (
+                <ChannelIcon
+                  key={c.id}
+                  icon={c.icon}
+                  name={c.name}
+                  size={15}
+                />
+              ))}
+            </div>
+          )}
         </div>
         <StatusBadge status={piece.status} />
       </div>

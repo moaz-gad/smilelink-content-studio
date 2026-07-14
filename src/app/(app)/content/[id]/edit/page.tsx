@@ -13,8 +13,14 @@ export default async function EditContentPage({
 
   const piece = await prisma.contentPiece.findUnique({
     where: { id: params.id },
+    include: { channels: { select: { id: true } } },
   });
   if (!piece) notFound();
+
+  const channels = await prisma.channel.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, icon: true },
+  });
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -23,6 +29,7 @@ export default async function EditContentPage({
         <p className="mt-1 text-sm text-ink-muted">{piece.title}</p>
       </div>
       <EditContentForm
+        channels={channels}
         piece={{
           id: piece.id,
           title: piece.title,
@@ -32,6 +39,7 @@ export default async function EditContentPage({
           brief: piece.brief,
           referenceLink: piece.referenceLink ?? "",
           scheduledDate: toDateInputValue(piece.scheduledDate),
+          channelIds: piece.channels.map((c) => c.id),
         }}
       />
     </div>

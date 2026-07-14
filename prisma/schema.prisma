@@ -109,12 +109,25 @@ model ContentPiece {
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
-  reviews ReviewLog[]
+  reviews  ReviewLog[]
+  channels Channel[]   @relation("ContentPieceChannels")
 
   @@index([monthlyDirectionId])
   @@index([assignedToId])
   @@index([status])
   @@index([scheduledDate])
+}
+
+// A social media platform a content piece can be published to.
+// Many-to-many with ContentPiece: one piece can target several channels,
+// and a channel appears on many pieces.
+model Channel {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g. "Instagram", "TikTok"
+  icon      String // brand-icon identifier (Simple Icons slug, e.g. "instagram", "tiktok")
+  createdAt DateTime @default(now())
+
+  pieces ContentPiece[] @relation("ContentPieceChannels")
 }
 
 // History of each approve/reject action so comments survive across revisions.

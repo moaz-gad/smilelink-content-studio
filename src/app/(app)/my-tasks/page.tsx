@@ -35,6 +35,10 @@ export default async function MyTasksPage() {
       referenceLink: true,
       creativeLink: true,
       status: true,
+      channels: {
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, icon: true },
+      },
       // Latest rejection so we can show the revision comment.
       reviews: {
         where: { decision: "REJECTED" },
@@ -55,6 +59,7 @@ export default async function MyTasksPage() {
     referenceLink: p.referenceLink,
     creativeLink: p.creativeLink,
     status: p.status as ContentStatusName,
+    channels: p.channels,
     rejectionComment: p.reviews[0]?.comment ?? null,
   }));
 

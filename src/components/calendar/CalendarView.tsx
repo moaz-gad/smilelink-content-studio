@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import StatusBadge from "@/components/StatusBadge";
+import ChannelIcon from "@/components/channels/ChannelIcon";
 import {
   CONTENT_TYPE_LABELS,
   FORMAT_LABELS,
@@ -21,6 +22,7 @@ export type CalendarPiece = {
   assigneeName: string | null;
   creativeLink: string | null;
   dateISO: string; // YYYY-MM-DD
+  channels: { id: string; name: string; icon: string }[];
 };
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -100,26 +102,40 @@ export default function CalendarView({
                       {dayPieces.map((p) => (
                         <div
                           key={p.id}
-                          className={`flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium ${STATUS_STYLES[p.status]}`}
+                          className={`rounded-md px-1.5 py-1 text-xs font-medium ${STATUS_STYLES[p.status]}`}
                         >
-                          <button
-                            onClick={() => setSelected(p)}
-                            className="min-w-0 flex-1 truncate text-left"
-                            title={p.title}
-                          >
-                            {p.title}
-                          </button>
-                          {p.status === "APPROVED" && p.creativeLink && (
-                            <a
-                              href={p.creativeLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              title="Open creative link"
-                              className="shrink-0 underline"
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setSelected(p)}
+                              className="min-w-0 flex-1 truncate text-left"
+                              title={p.title}
                             >
-                              ↗
-                            </a>
+                              {p.title}
+                            </button>
+                            {p.status === "APPROVED" && p.creativeLink && (
+                              <a
+                                href={p.creativeLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                title="Open creative link"
+                                className="shrink-0 underline"
+                              >
+                                ↗
+                              </a>
+                            )}
+                          </div>
+                          {p.channels.length > 0 && (
+                            <div className="mt-1 flex flex-wrap items-center gap-1">
+                              {p.channels.map((c) => (
+                                <ChannelIcon
+                                  key={c.id}
+                                  icon={c.icon}
+                                  name={c.name}
+                                  size={13}
+                                />
+                              ))}
+                            </div>
                           )}
                         </div>
                       ))}
@@ -163,6 +179,20 @@ export default function CalendarView({
               <span className="rounded-full bg-canvas px-2.5 py-1 font-medium text-ink-muted">
                 {FORMAT_LABELS[selected.format]}
               </span>
+              {selected.channels.map((c) => (
+                <span
+                  key={c.id}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-canvas px-2.5 py-1 font-medium text-ink-muted"
+                >
+                  <ChannelIcon
+                    icon={c.icon}
+                    name={c.name}
+                    size={14}
+                    fallback="none"
+                  />
+                  {c.name}
+                </span>
+              ))}
             </div>
 
             <dl className="mt-4 space-y-3 text-sm">
